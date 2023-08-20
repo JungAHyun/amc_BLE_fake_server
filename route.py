@@ -68,15 +68,18 @@ async def send_location(params: Dict[str, str] = Body(...)):
                 "  |  ",
                 watch["y"],
             )
-
-            # if watch["androidId"] == "635bc47c74db8b12":
-            if watch["scannerIndex"] == 39:
-                watch["scannerIndex"] = 0
+            selectScannerIndex = 4
+            if watch["androidId"] == "b0b3c8a5a932348e":
+                watch["x"] = scannerLocation[selectScannerIndex - 1]["x"]
+                watch["y"] = scannerLocation[selectScannerIndex - 1]["y"]
             else:
-                watch["scannerIndex"] = watch["scannerIndex"] + 1
+                if watch["scannerIndex"] == 39:
+                    watch["scannerIndex"] = 0
+                else:
+                    watch["scannerIndex"] = watch["scannerIndex"] + 1
 
-            watch["x"] = scannerLocation[watch["scannerIndex"]]["x"]
-            watch["y"] = scannerLocation[watch["scannerIndex"]]["y"]
+                watch["x"] = scannerLocation[watch["scannerIndex"]]["x"]
+                watch["y"] = scannerLocation[watch["scannerIndex"]]["y"]
 
             # if watch["x"] >= 72:
             #     direction = not direction
