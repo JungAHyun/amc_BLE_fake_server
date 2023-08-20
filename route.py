@@ -21,14 +21,6 @@ watch_2 = {
 androidIdList = ["000"]
 watchList = [watch_1, watch_2]
 
-# from pydantic import BaseModel
-# from typing import Optional
-
-# class Roctaion(BaseModel):
-#     androidId: str
-#     x: str
-#     y: str
-
 
 @location_router.post("/register")
 async def register_watch(params: Dict[str, str] = Body(...)):
