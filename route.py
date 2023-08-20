@@ -2,33 +2,44 @@ from fastapi import APIRouter
 from fastapi import Body
 import random
 from typing import Dict
+import pandas as pd
 
 location_router = APIRouter(
     prefix="/api",
     responses={404: {"description": "4444 not found"}},
 )
 
-watch_1 = {
-    "androidId": "111",
-    "x": random.uniform(0, 100),
-    "y": random.uniform(0, 100),
-}
-watch_2 = {
-    "androidId": "222",
-    "x": random.uniform(0, 100),
-    "y": random.uniform(0, 100),
-}
-androidIdList = ["000"]
-watchList = [watch_1, watch_2]
+
+androidIdList = []
+watchList = []
+scannerLocation = []
+
+
+def getScannerLocation():
+    # 읽어올 엑셀 파일 지정
+    filename = "아산병원_BLEScanner.xlsx"
+
+    # 엑셀 파일 읽어 오기
+    df = pd.read_excel(filename, engine="openpyxl", header=0)
+    for i in range(40):
+        x = df.iloc[i, 2]
+        y = df.iloc[i, 3]
+        scannerLocation.append({"x": x, "y": y})
+
+    return scannerLocation
 
 
 @location_router.post("/register")
 async def register_watch(params: Dict[str, str] = Body(...)):
+    scannerLocation = getScannerLocation()
+
     androidId = params["androidId"]
+    index = random.randint(0, 20)
     watch = {
         "androidId": androidId,
-        "x": random.uniform(0, 100),
-        "y": random.uniform(0, 100),
+        "scannerIndex": index,
+        "x": scannerLocation[index]["x"],
+        "y": scannerLocation[index]["y"],
     }
 
     if androidId not in androidIdList:
@@ -42,19 +53,30 @@ direction = True
 
 @location_router.get("/location")
 async def send_location(params: Dict[str, str] = Body(...)):
+    scannerLocation = getScannerLocation()
     androidId = params["androidId"]
     global direction
     location = {}
     for watch in watchList:
         if watch["androidId"] == androidId:
-            print(watch["androidId"], " : ", watch["x"], "  |  ", watch["y"])
+            print(
+                watch["androidId"],
+                " : ",
+                watch["scannerIndex"],
+                "  |  ",
+                watch["x"],
+                "  |  ",
+                watch["y"],
+            )
 
-            watch["x"] = 30 + random.uniform(1, 2)
-            watch["y"] = 50 + random.uniform(1, 2)
+            # if watch["androidId"] == "635bc47c74db8b12":
+            if watch["scannerIndex"] == 39:
+                watch["scannerIndex"] = 0
+            else:
+                watch["scannerIndex"] = watch["scannerIndex"] + 1
 
-            if watch["androidId"] == "635bc47c74db8b12":
-                watch["x"] = 70 + random.uniform(1, 2)
-                watch["y"] = 70 + random.uniform(1, 2)
+            watch["x"] = scannerLocation[watch["scannerIndex"]]["x"]
+            watch["y"] = scannerLocation[watch["scannerIndex"]]["y"]
 
             # if watch["x"] >= 72:
             #     direction = not direction
